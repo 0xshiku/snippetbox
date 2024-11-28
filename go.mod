@@ -1,1 +1,1 @@
-module snippetbox
+module github.com/0xshiku/snippetbox
