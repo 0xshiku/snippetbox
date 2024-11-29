@@ -1,11 +1,21 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 )
 
 func main() {
+	// Define a new command-line flag with the name 'addr', a default value of ":4000"
+	// Also present a short help text explaining wha the flag controls.
+	// The value of the flag will be stored in the addr variable at runtime
+	addr := flag.String("addr", ":4000", "HTTP network address")
+
+	// Use the flag.Parse() function to parse the command-line flag.
+	// Need to call this before the use of the addr variable, otherwise it will always contain the default value :4000
+	flag.Parse()
+
 	mux := http.NewServeMux()
 
 	// Creates a file server which serves files out of the "./ui/static" directory.
@@ -19,7 +29,9 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
-	log.Println("Starting server on :4000")
-	err := http.ListenAndServe(":4000", mux)
+	// The value returned from the flag.String() function is a pointer to the flag value, not the value itself.
+	// So we need to dereference the pointer (i.e prefix it with the * symbol) before using it.
+	log.Printf("Starting server on %s", *addr)
+	err := http.ListenAndServe(*addr, mux)
 	log.Fatal(err)
 }
