@@ -9,7 +9,22 @@ import (
 // http.ResponseWriter provides methods for assembling an HTTP response and sending it to the user
 // *http.Request is a pointer to a struct which holds information about the current request (http method and URL)
 func home(w http.ResponseWriter, r *http.Request) {
+	// Make sure that the request exactly matches "/"
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 	w.Write([]byte("Hello World!"))
+}
+
+// Adds a snippetView handler function
+func snippetView(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Display a specific snippet..."))
+}
+
+// Adds a snippetCreate handler function
+func snippetCreate(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet..."))
 }
 
 func main() {
@@ -18,6 +33,12 @@ func main() {
 	mux := http.NewServeMux()
 	// servemux treats the URL pattern "/" like a catch-all. You can visit /foo and will receive the same response
 	mux.HandleFunc("/", home)
+	// Register other handling functions
+	// Go's servemux supports two different types of URL patterns: fixed paths and subtree paths
+	// Fixed paths don't end with a /
+	// Subtree paths do. Subtree paths act like they have a wildcard at the end "/**" or "/static/**"
+	mux.HandleFunc("/snippet/view", snippetView)
+	mux.HandleFunc("snippet/create", snippetCreate)
 
 	// Uses the http.ListenAndServe() function to initialize a new servemux
 	// It needs to pass two parameters: the tcp network address to listen on (in this case ":4000")
