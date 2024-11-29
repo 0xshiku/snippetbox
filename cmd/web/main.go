@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -15,6 +16,13 @@ func main() {
 	// Use the flag.Parse() function to parse the command-line flag.
 	// Need to call this before the use of the addr variable, otherwise it will always contain the default value :4000
 	flag.Parse()
+
+	// Use log.New() to create a logger for writing information messages.
+	// In the last argument we use the bitwise operator OR / |
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+
+	// Create a logger for writing error messages in the same way, but use stderr as the destination.
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	mux := http.NewServeMux()
 
@@ -29,9 +37,17 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
+	// Initialize a new http.Server struct. We set the Addr and Handler fields so that the server use the same network address and routes as before
+	// Set the ErrorLog field so that the server now uses the custom errorLog logger in the event of any problems.
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
 	// The value returned from the flag.String() function is a pointer to the flag value, not the value itself.
 	// So we need to dereference the pointer (i.e prefix it with the * symbol) before using it.
-	log.Printf("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	infoLog.Printf("Starting server on %s", *addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
