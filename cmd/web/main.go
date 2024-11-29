@@ -7,6 +7,14 @@ import (
 	"os"
 )
 
+// Defines an application struct to hold the application-wide dependencies for the web application.
+// For now, it will only include custom loggers
+
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 	// Define a new command-line flag with the name 'addr', a default value of ":4000"
 	// Also present a short help text explaining wha the flag controls.
@@ -24,6 +32,12 @@ func main() {
 	// Create a logger for writing error messages in the same way, but use stderr as the destination.
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	// Initialize a new instance of our application struct containing the dependencies:
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
 	mux := http.NewServeMux()
 
 	// Creates a file server which serves files out of the "./ui/static" directory.
@@ -33,9 +47,9 @@ func main() {
 	// For matching paths, it strips the "/static" prefix before the request reaches the file server
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so that the server use the same network address and routes as before
 	// Set the ErrorLog field so that the server now uses the custom errorLog logger in the event of any problems.
@@ -46,7 +60,7 @@ func main() {
 	}
 
 	// The value returned from the flag.String() function is a pointer to the flag value, not the value itself.
-	// So we need to dereference the pointer (i.e prefix it with the * symbol) before using it.
+	// So we need to dereference the pointer (prefix it with the * symbol) before using it.
 	infoLog.Printf("Starting server on %s", *addr)
 	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
