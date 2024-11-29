@@ -24,6 +24,24 @@ func snippetView(w http.ResponseWriter, r *http.Request) {
 
 // Adds a snippetCreate handler function
 func snippetCreate(w http.ResponseWriter, r *http.Request) {
+	// Let's use r.Method to check whether the request is using POST or not.
+	// We need this because we need to make sure the request is a POST from the client side.
+	// If not return a 405 error.
+	if r.Method != "POST" {
+		// Let's set the allow method to be post. With this we have more complete information about the request
+		// Important: Header().Set() should be called before writeHeader() or w.Write().
+		// If it's called after it will have no effect
+		w.Header().Set("Allow", "POST")
+		// w.WriteHeader can only be written once.
+		// If w.WriteHeader is not called w.Write will send a 200
+		//w.WriteHeader(405)
+		//w.Write([]byte("Method not allowed"))
+		// http.Error() is a shortcut that calls w.WriteHeader() and w.Write behind-the-scenes
+		// The major difference is that it passes our http.ResponseWriter to another function
+		// Which sends a response to the user for us.
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	w.Write([]byte("Create a new snippet..."))
 }
 
