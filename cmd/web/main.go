@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"github.com/0xshiku/snippetbox/internal/models"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +15,12 @@ import (
 // Defines an application struct to hold the application-wide dependencies for the web application.
 // For now, it will only include custom loggers
 // Also adds snippets fields to the application struct. This will allow us to make the SnippetModel object available to our handlers
+// Adds a templateCache field to the application struct
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	snippets *models.SnippetModel
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -54,12 +57,19 @@ func main() {
 	// beneficial later in the future if you add a graceful shutdown to your application.
 	defer db.Close()
 
+	// Initialize a new template cache...
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	// Initialize a new instance of our application struct containing the dependencies:
 	// Initialize a models.SnippetModel instance and add it to the application dependencies.
 	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
-		snippets: &models.SnippetModel{db},
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		snippets:      &models.SnippetModel{db},
+		templateCache: templateCache,
 	}
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so that the server use the same network address and routes as before
