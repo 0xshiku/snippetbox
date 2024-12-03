@@ -21,35 +21,34 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
+	// Initialize a slice containing the paths to the two files.
+	// It's important to note that the file containing our base template must be the first file in the slice
+	files := []string{
+		"./ui/html/base.gohtml",
+		"./ui/html/partials/nav.gohtml",
+		"./ui/html/pages/home.gohtml",
 	}
 
-	//// Initialize a slice containing the paths to the two files.
-	//// It's important to note that the file containing our base template must be the first file in the slice
-	//files := []string{
-	//	"./ui/html/base.gohtml",
-	//	"./ui/html/partials/nav.gohtml",
-	//	"./ui/html/pages/home.gohtml",
-	//}
-	//
-	//// Use the template.ParseFiles() function to read the template file into a template set
-	//// We can pass the slice of file paths as a variadic parameter!
-	//ts, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	app.serverError(w, err)
-	//	http.Error(w, "Internal Server Error", 500)
-	//	return
-	//}
-	//
-	//// Use the Execute() method on the template set to write the template content as the response body
-	//// The last parameter to Execute() represents any dynamic data that we want to pass in.
-	//// ExecuteTemplate() method to write the content of the "base" template as the response body
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	app.serverError(w, err)
-	//	http.Error(w, "Internal Server Error", 500)
-	//}
+	// Use the template.ParseFiles() function to read the template file into a template set
+	// We can pass the slice of file paths as a variadic parameter!
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Creates an instance of a templateData struct holding the slice of snippets
+	data := &templateData{
+		Snippets: snippets,
+	}
+
+	// Use the Execute() method on the template set to write the template content as the response body
+	// The last parameter to Execute() represents any dynamic data that we want to pass in.
+	// ExecuteTemplate() method to write the content of the "base" template as the response body
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {

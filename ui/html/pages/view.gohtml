@@ -4,15 +4,19 @@
 <!-- You can call methods and pass arguments the same way you render dynamic data -->
 <!-- This also supports conditional comments -->
 {{define "main"}}
-    <div class="snippet">
-        <div class="metadata">
-            <strong>{{.Snippet.Title}}</strong>
-            <span>#{{.Snippet.ID}}</span>
+    <!-- with action is a condition that validates if snippet exists -->
+    <!-- This also let's you remove .Snippet prefix -->
+    {{with .Snippet}}
+        <div class="snippet">
+            <div class="metadata">
+                <strong>{{.Title}}</strong>
+                <span>#{{.ID}}</span>
+            </div>
+            <pre><code>{{.Content}}</code></pre>
+            <div class="metadata">
+                <time>Created: {{.Created}}</time>
+                <time>Expires: {{.Expires}}</time>
+            </div>
         </div>
-        <pre><code>{{.Snippet.Content}}</code></pre>
-        <div class="metadata">
-            <time>Created: {{.Snippet.Created}}</time>
-            <time>Expires: {{.Snippet.Expires}}</time>
-        </div>
-    </div>
+    {{end}}
 {{end}}
