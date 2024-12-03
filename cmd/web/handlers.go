@@ -20,10 +20,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Call the newTemplateData() helper to get a templateData struct containing the 'default' data and add the snippets slice to it.
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
+
 	// Use the render helper
-	app.render(w, http.StatusOK, "home.gohtml", &templateData{
-		Snippets: snippets,
-	})
+	app.render(w, http.StatusOK, "home.gohtml", data)
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -47,10 +49,12 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// And do the same thing again here...
+	data := app.newTemplateData(r)
+	data.Snippet = snippet
+
 	// Use the new render helper
-	app.render(w, http.StatusOK, "view.gohtml", &templateData{
-		Snippet: snippet,
-	})
+	app.render(w, http.StatusOK, "view.gohtml", data)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
