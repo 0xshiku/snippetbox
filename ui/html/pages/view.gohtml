@@ -1,0 +1,18 @@
+{{define "title"}}Snippet #{{.Snippet.ID}}{{end}}
+<!-- The html template package automatically escapes any data that is yielded between { } x2 tags. -->
+<!-- With nested templates you need to pass the . reference down -->
+<!-- You can call methods and pass arguments the same way you render dynamic data -->
+<!-- This also supports conditional comments -->
+{{define "main"}}
+    <div class="snippet">
+        <div class="metadata">
+            <strong>{{.Snippet.Title}}</strong>
+            <span>#{{.Snippet.ID}}</span>
+        </div>
+        <pre><code>{{.Snippet.Content}}</code></pre>
+        <div class="metadata">
+            <time>Created: {{.Snippet.Created}}</time>
+            <time>Expires: {{.Snippet.Expires}}</time>
+        </div>
+    </div>
+{{end}}

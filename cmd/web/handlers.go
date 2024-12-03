@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/0xshiku/snippetbox/internal/models"
+	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -72,8 +73,34 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Write the snippet data as a plain-text HTTP response body.
-	fmt.Fprintf(w, "%+v", snippet)
+	// Initialise a slice containing the paths to the view.tmpl file,
+	// plus the base layout and navigation partial that we made earlier
+	files := []string{
+		"./ui/html/base.gohtml",
+		"./ui/html/partials/nav.gohtml",
+		"./ui/html/pages/view.gohtml",
+	}
+
+	// Parse the template files...
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Create an instance of a templateData struct holding the snippet data.
+	data := &templateData{
+		Snippet: snippet,
+	}
+
+	// And then execute them. Notice how we are passing in the snippet
+	// data (a models.Snippet struct) as the final parameter?
+	// Go's html/template package allows you to pass in one - and only one - item of dynamic data when rendering a template
+	// A lightweight and type-safe way to achieve this is to wrap your dynamic data in a struct which acts like a single 'holding structure' for your data.
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
