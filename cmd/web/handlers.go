@@ -66,6 +66,9 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
+	// Limit the request body size to 4096 bytes
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+
 	// First call r.ParseForm() which adds any data in POST request bodies to the r.PostForm map.
 	// This also works in the same way for PUT and PATCH requests.
 	// If there are any errors, we use our app.ClientError() helper to send a 400 Bad Request response to the user
