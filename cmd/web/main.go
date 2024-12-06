@@ -79,6 +79,10 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
+	// Makes sure that the Secure attribute is set on our session cookies.
+	// Setting this means that the cookie will only be sent by a user's web browser when a HTTPS connection is being used
+	// (and won't be sent over an unsecure HTTP connection)
+	sessionManager.Cookie.Secure = true
 
 	// Initialize a new instance of our application struct containing the dependencies:
 	// Initialize a models.SnippetModel instance and add it to the application dependencies.
@@ -103,7 +107,10 @@ func main() {
 	// The value returned from the flag.String() function is a pointer to the flag value, not the value itself.
 	// So we need to dereference the pointer (prefix it with the * symbol) before using it.
 	infoLog.Printf("Starting server on %s", *addr)
-	err = srv.ListenAndServe()
+	// Use the ListenAndServeTLS() method to start the HTTPS server.
+	// We pass in the paths to the TLS certificate and corresponding private key as the two parameters.
+	// To install certificates locally we can run: go run /usr/local/go/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 
