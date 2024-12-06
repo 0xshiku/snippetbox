@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"github.com/0xshiku/snippetbox/internal/models"
@@ -96,12 +97,21 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
+	// Initialize a tls.Config struct to hold the non-default TLS settings we want the server to use.
+	// In this case the only thing that we're changing is the curve preferences value.
+	// So that only elliptic curves with assembly implementation are used
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so that the server use the same network address and routes as before
 	// Set the ErrorLog field so that the server now uses the custom errorLog logger in the event of any problems.
+	// Set the server's TLSConfig field to use the tlsConfig variable we just created
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:      *addr,
+		ErrorLog:  errorLog,
+		Handler:   app.routes(),
+		TLSConfig: tlsConfig,
 	}
 
 	// The value returned from the flag.String() function is a pointer to the flag value, not the value itself.
