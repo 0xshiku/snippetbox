@@ -138,6 +138,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// Uses the Put() method to add a string value ("Snippet successfully created!") and the corresponding key ("flash") to the session data
+	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created")
+
 	// Redirect the user to the relevant page for the snippet
 	// Updates the redirect path to use the new clean url format
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)

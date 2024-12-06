@@ -23,6 +23,10 @@ func (app *application) routes() http.Handler {
 
 	// Create a new middleware chain containing the middleware specific to our dynamic application routes.
 	// For now, this chain will only contain the LoadAndSave session middleware
+	// The LoadAndSave() middleware checks each incoming request for a session cookie.
+	// If a session cookie is present, it reads the session token and retrieves the corresponding session data from the database
+	// While also checking that the session hasn't expired.
+	// It then adds the session data to the request context so it can be used in your handlers
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
 	// And then create the routes using the appropriate methods, patterns and handlers

@@ -15,6 +15,10 @@
             {{template "nav" .}}
             <main>
                 <!-- The . after "main" represents any dynamic data that you want to pass to the invoked template -->
+                {{with .Flash}}
+                    <!-- Here the . means data inside Flash and not the general -->
+                    <div class='flash'>{{.}}</div>
+                {{end}}
                 {{template "main" .}}
             </main>
             <footer>
