@@ -27,6 +27,7 @@ func (app *application) routes() http.Handler {
 	// If a session cookie is present, it reads the session token and retrieves the corresponding session data from the database
 	// While also checking that the session hasn't expired.
 	// It then adds the session data to the request context so it can be used in your handlers
+	// Unprotected application routes using the "dynamic" middleware chain
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
 	// And then create the routes using the appropriate methods, patterns and handlers
@@ -35,15 +36,20 @@ func (app *application) routes() http.Handler {
 	// We also need to switch to registering the route using the router.Handler() method.
 	router.Handler(http.MethodGet, "/", dynamic.ThenFunc(app.home))
 	router.Handler(http.MethodGet, "/snippet/view/:id", dynamic.ThenFunc(app.snippetView))
-	router.Handler(http.MethodGet, "/snippet/create", dynamic.ThenFunc(app.snippetCreate))
-	router.Handler(http.MethodPost, "/snippet/create", dynamic.ThenFunc(app.snippetCreatePost))
 
 	// Auth routes
 	router.Handler(http.MethodGet, "/user/signup", dynamic.ThenFunc(app.userSignup))
 	router.Handler(http.MethodPost, "/user/signup", dynamic.ThenFunc(app.userSignupPost))
 	router.Handler(http.MethodGet, "/user/login", dynamic.ThenFunc(app.userLogin))
 	router.Handler(http.MethodPost, "/user/login", dynamic.ThenFunc(app.userLoginPost))
-	router.Handler(http.MethodPost, "/user/logout", dynamic.ThenFunc(app.userLogoutPost))
+
+	// Protected (authenticated-only) application routes, using a new "protected"
+	// Middleware chain which includes the requireAuthentication middleware.
+	protected := dynamic.Append(app.requireAuthentication)
+
+	router.Handler(http.MethodGet, "/snippet/create", protected.ThenFunc(app.snippetCreate))
+	router.Handler(http.MethodPost, "/snippet/create", protected.ThenFunc(app.snippetCreatePost))
+	router.Handler(http.MethodPost, "/user/logout", protected.ThenFunc(app.userLogoutPost))
 
 	// Create a middleware chain containing our 'standard' middleware
 	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
