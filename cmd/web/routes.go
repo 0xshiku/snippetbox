@@ -28,7 +28,8 @@ func (app *application) routes() http.Handler {
 	// While also checking that the session hasn't expired.
 	// It then adds the session data to the request context so it can be used in your handlers
 	// Unprotected application routes using the "dynamic" middleware chain
-	dynamic := alice.New(app.sessionManager.LoadAndSave)
+	// Use the nosurf middleware on all our 'dynamic' routes
+	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
 
 	// And then create the routes using the appropriate methods, patterns and handlers
 	// Update these routes to use the new dynamic middleware chain followed by the appropriate handler function.
@@ -45,6 +46,8 @@ func (app *application) routes() http.Handler {
 
 	// Protected (authenticated-only) application routes, using a new "protected"
 	// Middleware chain which includes the requireAuthentication middleware.
+	// Because the 'protected' middleware chain appends to the 'dynamic chain'
+	// the noSurf middleware will also be used on three routes below too
 	protected := dynamic.Append(app.requireAuthentication)
 
 	router.Handler(http.MethodGet, "/snippet/create", protected.ThenFunc(app.snippetCreate))

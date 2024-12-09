@@ -80,6 +80,14 @@ func main() {
 	// Use the scs.New() function to initialize a new session manager. Then we configure it to use our MySQL database as the session store.
 	// And set a lifetime of 12 hours (so that sessions automatically expire 12 hours after first being created)
 	sessionManager := scs.New()
+	// We can change the session cookie to use the SameSite=Strict setting instead of the default SameSite=Lax
+	// sessionManager.Cookie.SameSite = http.SameSiteStrictMode
+	// But it's important to be aware that using SameSite=Strict will block the session cookie being sent by the user's browser for all cross-site usage
+	// Including safe requests with HTTP methods like GET and HEAD
+	// While it might sound even safer (and it is!) the downside is that the session cookie won't be sent when a user clicks on a link to your application from another website
+	// That means that your application would initially treat the user as 'not logged in' even if they have an active session containing their "authenticatedUserID" value
+	// So if your application will potentially have other websites linking to it (or even links shared in emails or private messaging services)
+	// Then SameSite=Lax is generally the more appropriate setting
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 	// Makes sure that the Secure attribute is set on our session cookies.
