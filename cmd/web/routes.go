@@ -30,6 +30,9 @@ func (app *application) routes() http.Handler {
 	// -- any requests that start with /static/ can just be passed directly to the file server and the corresponding static file will be served (so long as it exists)
 	router.Handler(http.MethodGet, "/static/*filepath", fileServer)
 
+	// Add a new GET /ping route.
+	router.HandlerFunc(http.MethodGet, "/ping", ping)
+
 	// Create a new middleware chain containing the middleware specific to our dynamic application routes.
 	// For now, this chain will only contain the LoadAndSave session middleware
 	// The LoadAndSave() middleware checks each incoming request for a session cookie.
