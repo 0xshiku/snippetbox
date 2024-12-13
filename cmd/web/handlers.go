@@ -273,6 +273,14 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	// Add the ID of the current user to the session, so that they are now 'logged in'
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
+	// Use the PopString method to retrieve and remove a value from the session data in one step.
+	// If no matching key exists this will return the empty string
+	path := app.sessionManager.PopString(r.Context(), "redirectAfterLogin")
+	if path != "" {
+		http.Redirect(w, r, path, http.StatusSeeOther)
+		return
+	}
+
 	// Redirect the user to the create snippet page.
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
