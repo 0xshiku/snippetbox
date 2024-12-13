@@ -25,6 +25,7 @@ import (
 // Adds a new sessionManager field
 // Add a new users field to the application struct
 type application struct {
+	debug          bool
 	errorLog       *log.Logger
 	infoLog        *log.Logger
 	snippets       models.SnippetModelInterface // Use our new interface type.
@@ -42,6 +43,9 @@ func main() {
 
 	// Define a new command-line flag for the MySQL DSN string.
 	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
+
+	// Creates a new debug flag with the default value of false
+	debug := flag.Bool("debug", false, "Enable debug mode")
 
 	// Use the flag.Parse() function to parse the command-line flag.
 	// Need to call this before the use of the addr variable, otherwise it will always contain the default value :4000
@@ -100,6 +104,7 @@ func main() {
 	// And add it to the application dependencies.
 	// Initialize a models.UserModel instance and add it to the application dependencies.
 	app := &application{
+		debug:          *debug,
 		errorLog:       errorLog,
 		infoLog:        infoLog,
 		snippets:       &models.SnippetModel{db},
