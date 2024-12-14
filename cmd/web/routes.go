@@ -69,6 +69,10 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodPost, "/snippet/create", protected.ThenFunc(app.snippetCreatePost))
 	router.Handler(http.MethodPost, "/user/logout", protected.ThenFunc(app.userLogoutPost))
 
+	// Add the two new routes, restricted to authenticated users only
+	router.Handler(http.MethodGet, "/account/password/update", protected.ThenFunc(app.accountPasswordUpdate))
+	router.Handler(http.MethodPost, "account/password/update", protected.ThenFunc(app.accountPasswordUpdatePost))
+
 	// Create a middleware chain containing our 'standard' middleware
 	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
